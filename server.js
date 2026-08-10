@@ -2,12 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const connectDB = require('./config/database');
-const { apiLimiter } = require('./middleware/rateLimit.middleware');
-const { notFound, errorHandler } = require('./middleware/error.middleware');
-const authRoutes = require('./routes/auth.routes');
-const challengeRoutes = require('./routes/challenge.routes');
-const playerRoutes = require('./routes/player.routes');
+const connectDB = require('./src/config/database');
+const { apiLimiter } = require('./src/middleware/rateLimit.middleware');
+const { notFound, errorHandler } = require('./src/middleware/error.middleware');
+const authRoutes = require('./src/routes/auth.routes');
+const challengeRoutes = require('./src/routes/challenge.routes');
+const playerRoutes = require('./src/routes/player.routes');
 
 const app = express();
 
@@ -49,4 +49,14 @@ const start = async () => {
   }
 };
 
-start();
+if (require.main === module) {
+  start();
+} else {
+  // Vercel (serverless): connect to MongoDB on module load. Mongoose buffers
+  // operations until the connection is ready, so early requests are safe.
+  connectDB().catch((error) => {
+    console.error(`MongoDB connection error: ${error.message}`);
+  });
+}
+
+module.exports = app;
