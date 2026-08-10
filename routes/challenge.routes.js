@@ -1,0 +1,46 @@
+const express = require('express');
+const { body } = require('express-validator');
+const {
+  createChallenge,
+  getChallenges,
+  getChallengeById,
+  updateChallenge,
+  deleteChallenge,
+  getStats,
+} = require('../controllers/challenge.controller');
+const protect = require('../middleware/auth.middleware');
+const validate = require('../middleware/validate.middleware');
+
+const router = express.Router();
+
+router.get('/stats', protect, getStats);
+
+router.get('/', protect, getChallenges);
+
+router.post(
+  '/',
+  protect,
+  [
+    body('title').trim().notEmpty().withMessage('Challenge title is required'),
+    body('words').isArray({ min: 10, max: 10 }).withMessage('A challenge must contain exactly 10 words'),
+  ],
+  validate,
+  createChallenge
+);
+
+router.get('/:id', protect, getChallengeById);
+
+router.put(
+  '/:id',
+  protect,
+  [
+    body('title').trim().notEmpty().withMessage('Challenge title is required'),
+    body('words').isArray({ min: 10, max: 10 }).withMessage('A challenge must contain exactly 10 words'),
+  ],
+  validate,
+  updateChallenge
+);
+
+router.delete('/:id', protect, deleteChallenge);
+
+module.exports = router;
