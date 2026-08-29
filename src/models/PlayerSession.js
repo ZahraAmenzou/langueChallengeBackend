@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const LOCK_DURATION_MS = 5 * 60 * 60 * 1000;
+const MAX_ATTEMPTS = 10;
 
 const playerSessionSchema = new mongoose.Schema(
   {
@@ -23,9 +24,18 @@ const playerSessionSchema = new mongoose.Schema(
     },
     attemptsRemaining: {
       type: Number,
-      default: 3,
+      default: MAX_ATTEMPTS,
       min: 0,
-      max: 3,
+    },
+    gems: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    bonusAttempts: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
     score: {
       type: Number,
@@ -66,5 +76,10 @@ playerSessionSchema.methods.isLocked = function () {
   return this.lockedUntil && Date.now() < new Date(this.lockedUntil).getTime();
 };
 
+playerSessionSchema.methods.effectiveMaxAttempts = function () {
+  return MAX_ATTEMPTS + (this.gems || 0) + (this.bonusAttempts || 0);
+};
+
 module.exports = mongoose.model('PlayerSession', playerSessionSchema);
 module.exports.LOCK_DURATION_MS = LOCK_DURATION_MS;
+module.exports.MAX_ATTEMPTS = MAX_ATTEMPTS;

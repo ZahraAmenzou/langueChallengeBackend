@@ -1,10 +1,9 @@
 const crypto = require('crypto');
 const Challenge = require('../models/Challenge');
 const PlayerSession = require('../models/PlayerSession');
-const { LOCK_DURATION_MS } = require('../models/PlayerSession');
+const { LOCK_DURATION_MS, MAX_ATTEMPTS } = require('../models/PlayerSession');
 
 const POINTS_PER_WORD = 10;
-const MAX_ATTEMPTS = 3;
 
 const getChallengeByCode = (code) => Challenge.findOne({ uniqueCode: code });
 
@@ -23,6 +22,7 @@ const buildState = (challenge, session) => {
     challengeId: challenge._id,
     uniqueCode: challenge.uniqueCode,
     title: challenge.title,
+    language: challenge.language,
     totalWords: challenge.words.length,
     currentWord:
       session.currentQuestion < challenge.words.length
@@ -30,6 +30,9 @@ const buildState = (challenge, session) => {
         : null,
     currentQuestion: session.currentQuestion,
     attemptsRemaining: session.attemptsRemaining,
+    gems: session.gems,
+    bonusAttempts: session.bonusAttempts,
+    totalAttempts: session.effectiveMaxAttempts(),
     score: session.score,
     correctAnswers: session.correctAnswers,
     wrongAnswers: session.wrongAnswers,
@@ -44,7 +47,7 @@ const buildState = (challenge, session) => {
 const maybeUnlock = (session) => {
   if (session.lockedUntil && Date.now() >= new Date(session.lockedUntil).getTime()) {
     session.lockedUntil = null;
-    session.attemptsRemaining = MAX_ATTEMPTS;
+    session.attemptsRemaining = session.effectiveMaxAttempts();
     session.wrongAnswers = 0;
     return true;
   }
@@ -62,6 +65,7 @@ const getChallengeStatus = async (req, res, next) => {
       success: true,
       challenge: {
         title: challenge.title,
+        language: challenge.language,
         uniqueCode: challenge.uniqueCode,
         totalWords: challenge.words.length,
       },
@@ -186,15 +190,24 @@ const answer = async (req, res, next) => {
     const isCorrect = normalize(currentWord.correctAnswer) === normalize(submitted);
 
     let locked = false;
+    let gemEarned = false;
+    let bonusEarned = false;
 
     if (isCorrect) {
       session.score += POINTS_PER_WORD;
       session.correctAnswers += 1;
       session.currentQuestion += 1;
 
+      session.gems += 1;
+      session.attemptsRemaining += 1;
+      gemEarned = true;
+
       if (session.currentQuestion >= challenge.words.length) {
         session.completed = true;
         session.completedAt = new Date(now);
+        session.bonusAttempts += 1;
+        session.attemptsRemaining += 1;
+        bonusEarned = true;
       }
     } else {
       session.wrongAnswers += 1;
@@ -212,6 +225,8 @@ const answer = async (req, res, next) => {
       success: true,
       correct: isCorrect,
       locked,
+      gemEarned,
+      bonusEarned,
       message: isCorrect ? 'CORRECT' : 'WRONG',
       state: buildState(challenge, session),
     });

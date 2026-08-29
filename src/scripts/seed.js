@@ -6,7 +6,7 @@ const seedAdmin = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
 
-    const email = (process.env.ADMIN_EMAIL || 'admin@tachelhit.com').toLowerCase();
+    const email = (process.env.ADMIN_EMAIL || 'admin@example.com').toLowerCase();
     const password = process.env.ADMIN_PASSWORD || 'admin123';
     const name = process.env.ADMIN_NAME || 'Challenge Admin';
 

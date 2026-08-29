@@ -10,6 +10,7 @@ const {
 } = require('../controllers/challenge.controller');
 const protect = require('../middleware/auth.middleware');
 const validate = require('../middleware/validate.middleware');
+const { LANGUAGE_CODES } = require('../config/languages');
 
 const router = express.Router();
 
@@ -17,11 +18,18 @@ router.get('/stats', protect, getStats);
 
 router.get('/', protect, getChallenges);
 
+const languageValidation = body('language')
+  .optional()
+  .trim()
+  .isIn(LANGUAGE_CODES)
+  .withMessage(`Unsupported language. Allowed: ${LANGUAGE_CODES.join(', ')}`);
+
 router.post(
   '/',
   protect,
   [
     body('title').trim().notEmpty().withMessage('Challenge title is required'),
+    languageValidation,
     body('words').isArray({ min: 10, max: 10 }).withMessage('A challenge must contain exactly 10 words'),
   ],
   validate,
@@ -35,6 +43,7 @@ router.put(
   protect,
   [
     body('title').trim().notEmpty().withMessage('Challenge title is required'),
+    languageValidation,
     body('words').isArray({ min: 10, max: 10 }).withMessage('A challenge must contain exactly 10 words'),
   ],
   validate,

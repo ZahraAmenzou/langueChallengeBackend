@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
+const { LANGUAGE_CODES, DEFAULT_LANGUAGE } = require('../config/languages');
 
 const wordSchema = new mongoose.Schema(
   {
     word: {
       type: String,
-      required: [true, 'Tachelhit word is required'],
+      required: [true, 'Word is required'],
       trim: true,
       maxlength: [120, 'Word cannot exceed 120 characters'],
     },
@@ -25,6 +26,13 @@ const challengeSchema = new mongoose.Schema(
       required: [true, 'Challenge title is required'],
       trim: true,
       maxlength: [100, 'Title cannot exceed 100 characters'],
+    },
+    language: {
+      type: String,
+      required: true,
+      enum: { values: LANGUAGE_CODES, message: `Unsupported language. Allowed: ${LANGUAGE_CODES.join(', ')}` },
+      default: DEFAULT_LANGUAGE,
+      index: true,
     },
     uniqueCode: {
       type: String,
