@@ -23,6 +23,7 @@ const buildState = (challenge, session) => {
     uniqueCode: challenge.uniqueCode,
     title: challenge.title,
     language: challenge.language,
+    translationLanguage: challenge.translationLanguage,
     totalWords: challenge.words.length,
     currentWord:
       session.currentQuestion < challenge.words.length
@@ -66,6 +67,7 @@ const getChallengeStatus = async (req, res, next) => {
       challenge: {
         title: challenge.title,
         language: challenge.language,
+        translationLanguage: challenge.translationLanguage,
         uniqueCode: challenge.uniqueCode,
         totalWords: challenge.words.length,
       },

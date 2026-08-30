@@ -24,7 +24,7 @@ const findChallenge = async (idOrCode) => {
 
 const createChallenge = async (req, res, next) => {
   try {
-    const { title, words, language } = req.body;
+    const { title, words, language, translationLanguage } = req.body;
 
     if (!Array.isArray(words) || words.length !== MAX_WORDS) {
       return res.status(400).json({ success: false, message: `A challenge must contain exactly ${MAX_WORDS} words` });
@@ -39,6 +39,7 @@ const createChallenge = async (req, res, next) => {
     const challenge = await Challenge.create({
       title: String(title || '').trim(),
       language: cleanLanguage(language),
+      translationLanguage: cleanLanguage(translationLanguage),
       uniqueCode,
       words: cleaned,
       createdBy: req.admin._id,
@@ -51,6 +52,7 @@ const createChallenge = async (req, res, next) => {
         id: challenge._id,
         title: challenge.title,
         language: challenge.language,
+        translationLanguage: challenge.translationLanguage,
         uniqueCode: challenge.uniqueCode,
         words: challenge.words.length,
         createdAt: challenge.createdAt,
@@ -95,6 +97,7 @@ const getChallenges = async (req, res, next) => {
         id: challenge._id,
         title: challenge.title,
         language: challenge.language,
+        translationLanguage: challenge.translationLanguage,
         uniqueCode: challenge.uniqueCode,
         words: challenge.words.length,
         createdAt: challenge.createdAt,
@@ -124,6 +127,7 @@ const getChallengeById = async (req, res, next) => {
         id: challenge._id,
         title: challenge.title,
         language: challenge.language,
+        translationLanguage: challenge.translationLanguage,
         uniqueCode: challenge.uniqueCode,
         words: challenge.words.map((w) => ({ word: w.word, correctAnswer: w.correctAnswer })),
         createdAt: challenge.createdAt,
@@ -137,7 +141,7 @@ const getChallengeById = async (req, res, next) => {
 
 const updateChallenge = async (req, res, next) => {
   try {
-    const { title, words, language } = req.body;
+    const { title, words, language, translationLanguage } = req.body;
     const challenge = await findChallenge(req.params.id);
 
     if (!challenge) {
@@ -155,6 +159,7 @@ const updateChallenge = async (req, res, next) => {
 
     challenge.title = String(title || '').trim();
     challenge.language = cleanLanguage(language);
+    challenge.translationLanguage = cleanLanguage(translationLanguage);
     challenge.words = cleaned;
     await challenge.save();
 
@@ -165,6 +170,7 @@ const updateChallenge = async (req, res, next) => {
         id: challenge._id,
         title: challenge.title,
         language: challenge.language,
+        translationLanguage: challenge.translationLanguage,
         uniqueCode: challenge.uniqueCode,
         words: challenge.words.length,
         createdAt: challenge.createdAt,

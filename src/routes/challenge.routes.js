@@ -24,12 +24,19 @@ const languageValidation = body('language')
   .isIn(LANGUAGE_CODES)
   .withMessage(`Unsupported language. Allowed: ${LANGUAGE_CODES.join(', ')}`);
 
+const translationLanguageValidation = body('translationLanguage')
+  .optional()
+  .trim()
+  .isIn(LANGUAGE_CODES)
+  .withMessage(`Unsupported translation language. Allowed: ${LANGUAGE_CODES.join(', ')}`);
+
 router.post(
   '/',
   protect,
   [
     body('title').trim().notEmpty().withMessage('Challenge title is required'),
     languageValidation,
+    translationLanguageValidation,
     body('words').isArray({ min: 10, max: 10 }).withMessage('A challenge must contain exactly 10 words'),
   ],
   validate,
@@ -44,6 +51,7 @@ router.put(
   [
     body('title').trim().notEmpty().withMessage('Challenge title is required'),
     languageValidation,
+    translationLanguageValidation,
     body('words').isArray({ min: 10, max: 10 }).withMessage('A challenge must contain exactly 10 words'),
   ],
   validate,

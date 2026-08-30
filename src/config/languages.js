@@ -6,6 +6,13 @@ const LANGUAGES = {
     bcp47: 'zgh',
     flag: '🌐',
   },
+  arabic: {
+    code: 'arabic',
+    label: 'Arabic',
+    nativeName: 'العربية',
+    bcp47: 'ar',
+    flag: '🇲🇦',
+  },
   french: {
     code: 'french',
     label: 'French',

@@ -13,6 +13,17 @@ const migrate = async () => {
     );
 
     console.log(`Migration complete. Updated ${modifiedCount} challenge(s) to language "${DEFAULT_LANGUAGE}".`);
+
+    const { modifiedCount: translationCount } = await Challenge.updateMany(
+      {
+        $or: [{ translationLanguage: { $exists: false } }, { translationLanguage: null }, { translationLanguage: '' }],
+      },
+      { $set: { translationLanguage: DEFAULT_LANGUAGE } }
+    );
+
+    console.log(
+      `Migration complete. Updated ${translationCount} challenge(s) to translation language "${DEFAULT_LANGUAGE}".`
+    );
     await mongoose.disconnect();
     process.exit(0);
   } catch (error) {

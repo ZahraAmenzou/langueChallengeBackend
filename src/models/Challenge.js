@@ -34,6 +34,12 @@ const challengeSchema = new mongoose.Schema(
       default: DEFAULT_LANGUAGE,
       index: true,
     },
+    translationLanguage: {
+      type: String,
+      required: true,
+      enum: { values: LANGUAGE_CODES, message: `Unsupported translation language. Allowed: ${LANGUAGE_CODES.join(', ')}` },
+      default: DEFAULT_LANGUAGE,
+    },
     uniqueCode: {
       type: String,
       required: true,
