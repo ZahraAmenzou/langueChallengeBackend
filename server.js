@@ -108,6 +108,7 @@ const corsOptions = {
   allowedHeaders: [
     'Content-Type',
     'Authorization',
+    'x-player-token',
   ],
 
   optionsSuccessStatus: 204,
